@@ -1,3 +1,18 @@
 language: java
 sudo: false
-script: mvn clean verify
+# node_js:
+# - node
+# cache:
+#   directories:
+#     - node_modules
+# script: 
+#     - mvn clean verify
+#     - npm install -g serverless
+#     - sls deploy
+#     
+# deploy:
+#     provider: script
+#     script: .ci/travis/deploy
+#      skip_cleanup: true
+#      on:
+#         condition: $TRAVIS_BRANCH == "master" || -n $TRAVIS_TAG
