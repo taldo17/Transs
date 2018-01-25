@@ -45,6 +45,8 @@ public class TranssSteps
         File file = new File(classLoader.getResource(stateImageName).getFile());
         InputStream inputStream = new FileInputStream(file);
         byte[] imageOriginalBytes = IOUtils.toByteArray(inputStream);
+        String interesting = imageOriginalBytes.toString();
+        System.out.println(interesting);
         TranssService transsService = new TranssService(new RekognitionImageRecognition(), new Jira());
         transsService.analyzeImageAndUpdateALM(imageOriginalBytes);
     }

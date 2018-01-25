@@ -33,10 +33,15 @@ public class RekognitionImageRecognition implements ImageRecognition
         Set<WorkItemDetails> workItemsDetails = new HashSet<>();
         try
         {
+            LOG.info("Taldo: Getting the Rekognition Client");
             AmazonRekognition rekognitionClient = getAmazonRekognitionClient();
+            LOG.info("Taldo: Got Rekognition Client");
             DetectTextRequest request = createDetectTextRequest(rawData);
+            LOG.info("Taldo: Created Text Request");
             DetectTextResult detectTextResult = rekognitionClient.detectText(request);
+            LOG.info("Taldo: Got Result");
             List<TextDetection> textDetections = detectTextResult.getTextDetections();
+            LOG.info("Taldo: Total text detections: "  + textDetections.size());
             List<TextDetection> wordTextDetections = textDetections.stream()
                     .filter(detectedText -> detectedText.getType().equalsIgnoreCase(WORD)).collect(Collectors.toList());
             detectLinesBetweenStates(wordTextDetections);
