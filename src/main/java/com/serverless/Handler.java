@@ -22,7 +22,7 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 	public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
 		BasicConfigurator.configure();
 		List<Object> body =  input.keySet().stream().filter(key -> key.equalsIgnoreCase("body")).collect(Collectors.toList());
-        String printings = body.get(0).toString();
+        String printings = input.get(body.get(0)).toString();
         System.out.println("printing the body: " + printings);
         transsService.analyzeImageAndUpdateALM(printings.getBytes());
 		LOG.info("received: " + input);
