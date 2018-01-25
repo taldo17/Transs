@@ -1,0 +1,20 @@
+*.class
+target
+/bin/
+/.settings/
+.project
+.classpath
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Serverless directories
+.serverless
+
+/cucumber/
+/.idea/
+/target/
+/Test Results - CucumberRunner.html
+/transs.iml
