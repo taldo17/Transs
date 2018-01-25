@@ -1,3 +1,11 @@
 language: java
 sudo: false
-script: mvn clean verify
+node_js:
+- node
+cache:
+  directories:
+    - node_modules
+script: 
+    - mvn clean verify
+    - npm install -g serverless
+    - sls deploy
