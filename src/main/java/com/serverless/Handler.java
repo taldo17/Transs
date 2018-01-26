@@ -29,16 +29,14 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 			LOG.info("Taldo: key and values are: " + s + " " + input.get(s));
 		}
 
-		Object body1 = input.get("body");
-		if(body1 == null){
+		Object bodyObject = input.get("body");
+		if(bodyObject == null){
 			LOG.error("The body is null!!!");
 			return null;
 		}
-		JSONObject jsonObject = new JSONObject(body1);
+		JSONObject jsonObject = new JSONObject(bodyObject.toString());
 		Object image = jsonObject.get("image");
 		LOG.info("The image is " + image);
-//		String body = body1.toString();
-//		LOG.info("Taldo: the body is: " +  body);
 		byte[] imageByte = null;
 		try
 		{
@@ -50,7 +48,6 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 		{
 			LOG.error("Taldo: got exception while decoding:  ", e);
 		}
-//		LOG.info("Taldo: printing the body: " + body);
         transsService.analyzeImageAndUpdateALM(imageByte);
 		Response responseBody = new Response("Go Serverless v1.x! Your function executed successfully! Changed", input);
 		return ApiGatewayResponse.builder()
