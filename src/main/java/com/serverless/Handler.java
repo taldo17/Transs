@@ -7,11 +7,12 @@ import com.transs.RekognitionImageRecognition;
 import com.transs.TranssService;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import sun.misc.BASE64Decoder;
 
+import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
@@ -21,11 +22,36 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 	@Override
 	public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
 		BasicConfigurator.configure();
-		List<Object> body =  input.keySet().stream().filter(key -> key.equalsIgnoreCase("body")).collect(Collectors.toList());
-        String printings = input.get(body.get(0)).toString();
-        System.out.println("printing the body: " + printings);
-        transsService.analyzeImageAndUpdateALM(printings.getBytes());
-		LOG.info("received: " + input);
+		BASE64Decoder decoder = new BASE64Decoder();
+
+		for (String s : input.keySet())
+		{
+			LOG.info("Taldo: key and values are: " + s + " " + input.get(s));
+		}
+
+		Object body1 = input.get("body");
+		if(body1 == null){
+			LOG.error("The body is null!!!");
+			return null;
+		}
+		JSONObject jsonObject = new JSONObject(body1);
+		Object image = jsonObject.get("image");
+		LOG.info("The image is " + image);
+//		String body = body1.toString();
+//		LOG.info("Taldo: the body is: " +  body);
+		byte[] imageByte = null;
+		try
+		{
+			LOG.info("Taldo: decoding");
+			imageByte = decoder.decodeBuffer(image.toString());
+			LOG.info("Taldo: decoded");
+		}
+		catch (IOException e)
+		{
+			LOG.error("Taldo: got exception while decoding:  ", e);
+		}
+//		LOG.info("Taldo: printing the body: " + body);
+        transsService.analyzeImageAndUpdateALM(imageByte);
 		Response responseBody = new Response("Go Serverless v1.x! Your function executed successfully! Changed", input);
 		return ApiGatewayResponse.builder()
 				.setStatusCode(200)
