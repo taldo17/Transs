@@ -14,7 +14,9 @@ import java.util.Set;
 
 public class Jira implements ALMProvider
 {
-    private static String auth = new String(Base64.encode("Eli.Zakashansky:Z2k2sh2nsky"));
+    //since transs not yet impersonates a specific client, this class works with fixed credentials.
+    //to make this class funciotnal replace it with actual credentials
+    private static String auth = new String(Base64.encode("<username>:<password>"));
     private final Client client = Client.create();
 
     @Override
