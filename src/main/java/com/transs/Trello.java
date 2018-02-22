@@ -43,7 +43,7 @@ public class Trello implements ALMProvider {
         }
     }
 
-    private void updateWorkItem(String id, String status){
+    public void updateWorkItem(String id, String status){
         JSONObject card = getCard(id, client);
 
         updateWorkItemInTrello(statusNameToUdMapping.get(status),

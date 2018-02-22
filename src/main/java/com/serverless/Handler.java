@@ -2,9 +2,9 @@ package com.serverless;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.transs.Jira;
 import com.transs.RekognitionImageRecognition;
 import com.transs.TranssService;
+import com.transs.Trello;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
 	private static final Logger LOG = Logger.getLogger(Handler.class);
-	private TranssService transsService = new TranssService(new RekognitionImageRecognition(), new Jira());
+	private TranssService transsService = new TranssService(new RekognitionImageRecognition(), new Trello());
 
 	@Override
 	public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
