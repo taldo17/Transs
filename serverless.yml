@@ -42,9 +42,9 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-environment:
-  AWS_ACCESS_KEY_ID: AKIAIWDD2JY3Z6VJAH2Q
-  AWS_SECRET_ACCESS_KEY: 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
+#environment:
+#  AWS_ACCESS_KEY_ID: missing
+#  AWS_SECRET_ACCESS_KEY: missing
 
 
 # you can add packaging information here
