@@ -15,9 +15,10 @@ public class Trello implements ALMProvider {
 
     private HashMap<String, String> statusIdToNameMapping;
     private HashMap<String, String> statusNameToUdMapping;
+    private static final String INITIAL_URL_PREFIX = "https://api.trello.com/1/";
 
     public Trello(){
-        JSONArray lists = getLists(client);
+        JSONArray lists = getLists();
         statusIdToNameMapping = new HashMap<String, String>(4);
         statusNameToUdMapping = new HashMap<String, String>(4);
         statusIdToNameMapping.put("none", "Not found");
@@ -32,53 +33,14 @@ public class Trello implements ALMProvider {
         }
     }
 
-
-
     @Override
     public void updateWorkItems(Set<WorkItemDetails> workItemDetails)
     {
         for (WorkItemDetails workItemDetail : workItemDetails)
         {
-            updateWorkItem(workItemDetail.id, workItemDetail.newState);
+            updateWorkItem(workItemDetail);
+
         }
-    }
-
-    public void updateWorkItem(String id, String status){
-        JSONObject card = getCard(id, client);
-
-        updateWorkItemInTrello(statusNameToUdMapping.get(status),
-                card.getString("id"),
-                getDescription(card),
-                client);
-    }
-
-    private static String getDescription(JSONObject card) {
-        String description = card.getString("desc");
-        if(!description.endsWith("Updated by TRANSS - Build Trust Throughout Transparency!"))
-        {
-            description += "%0AUpdated%20by%20TRANSS%20-%20Build%20Trust%20Throughout%20Transparency!";
-        }
-
-        //make sure it will not corrupt the url
-        description = description.replace(" ", "%20");
-        description = description.replace("\n", "%0A");
-
-        return description;
-    }
-
-
-    private static void updateWorkItemInTrello(String newListId, String cardId, String description, Client client){
-        //String cardID = "5a85e78bbb28cd0af31da3a5";
-        String url = "https://api.trello.com/1/cards/"+ cardId +"?desc="+description+"&idList=" + newListId + "&" + trelloAuthenticationPostfix();
-
-        System.out.println(url);
-        WebResource webResource = client.resource(url);
-        ClientResponse response = webResource.put(ClientResponse.class);
-        System.out.println("Status = " + response.getStatus());
-
-        String jsonResponse = response.getEntity(String.class);
-        System.out.println(jsonResponse);
-
     }
 
     @Override
@@ -86,20 +48,54 @@ public class Trello implements ALMProvider {
         return statusIdToNameMapping.get(getCard(id, client).get("idList"));
     }
 
-
-    private static JSONArray getLists(Client client){
-        String url = "https://api.trello.com/1/boards/5a85e015c8b0ad48292bdf26/lists?" + trelloAuthenticationPostfix();
-        return getJsonArrayFromURL(client, url);
-    }
-
-    private static JSONArray getCards(Client client){
-        String url = "https://api.trello.com/1/boards/5a85e015c8b0ad48292bdf26/cards?" + trelloAuthenticationPostfix();
-        return getJsonArrayFromURL(client, url);
-    }
-
-    private static JSONArray getJsonArrayFromURL(Client client, String url) {
+    private void updateWorkItem(WorkItemDetails workItemDetail)
+    {
+        JSONObject card = getCard(workItemDetail.id, client);
+        String url = INITIAL_URL_PREFIX + "cards/"+ card.getString("id") +"?desc="+ getDescription(card) +"&idList=" + statusNameToUdMapping.get(workItemDetail.newState) + "&" + trelloAuthenticationPostfix();
         System.out.println(url);
+        WebResource webResource = client.resource(url);
+        ClientResponse response = webResource.put(ClientResponse.class);
+        System.out.println("Status = " + response.getStatus());
+        String jsonResponse = response.getEntity(String.class);
+        System.out.println(jsonResponse);
+    }
 
+    private static String getDescription(JSONObject card) {
+        String description = card.getString("desc");
+        if (!descriptionIsAlreadyUpdatedByTranss(description))
+        {
+            description += "%0AUpdated%20by%20TRANSS%20-%20Build%20Trust%20Throughout%20Transparency!";
+        }
+        description = verifyUrlIsNotCorrupted(description);
+        return description;
+    }
+
+    private static boolean descriptionIsAlreadyUpdatedByTranss(String description)
+    {
+        return description.endsWith(TranssService.TRANSS_UPDATE_COMMENT);
+    }
+
+    private static String verifyUrlIsNotCorrupted(String description)
+    {
+        description = description.replace(" ", "%20");
+        description = description.replace("\n", "%0A");
+        return description;
+    }
+
+
+
+    private JSONArray getLists(){
+        String url = INITIAL_URL_PREFIX + "boards/5a927e792baffb4f2f90920f/lists?" + trelloAuthenticationPostfix();
+        return httpGetOnUrl(url);
+    }
+
+    private JSONArray getCards(){
+        String url = INITIAL_URL_PREFIX + "boards/5a927e792baffb4f2f90920f/cards?" + trelloAuthenticationPostfix();
+        return httpGetOnUrl(url);
+    }
+
+    private JSONArray httpGetOnUrl(String url) {
+        System.out.println(url);
         WebResource webResource = client.resource(url);
         ClientResponse response = webResource.get(ClientResponse.class);
         System.out.println("Status = " + response.getStatus());
@@ -111,8 +107,8 @@ public class Trello implements ALMProvider {
 
 
 
-    private static JSONObject getCard(String id, Client client){
-        JSONArray cards = getCards(client);
+    private JSONObject getCard(String id, Client client){
+        JSONArray cards = getCards();
         for (int i = 0; i < cards.length(); i++) {
             JSONObject card = cards.getJSONObject(i);
             String cardName = card.getString("name");
@@ -120,14 +116,17 @@ public class Trello implements ALMProvider {
                 return card;
             }
         }
+        return emptyCard();
+    }
 
-        //return empty card
+    private static JSONObject emptyCard()
+    {
         return new JSONObject("{\"idList\":\"none\"}");
     }
 
     private static String trelloAuthenticationPostfix(){
         String trelloApiKey = ""; //originated by trello
-        String trelloToken = ""; //originted by trello
+        String trelloToken = ""; //originated by trello
         return "key=" + trelloApiKey +"&token=" + trelloToken;
     }
 
