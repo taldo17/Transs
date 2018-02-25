@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class TranssSteps
 {
@@ -32,8 +34,9 @@ public class TranssSteps
     {
         initialState = currentState;
         currentId = id;
-        trello.updateWorkItem(String.valueOf(currentId), initialState);
-        RekognitionImageRecognition rekognitionImageRecognition = new RekognitionImageRecognition();
+        Set<WorkItemDetails> workItemDetails = new HashSet<>();
+        workItemDetails.add(new WorkItemDetails(0, 0, String.valueOf(id), initialState));
+        trello.updateWorkItems(workItemDetails);
         String actualWorkItemStatus = trello.getWorkItemStatus(String.valueOf(id));
         Assert.assertEquals(initialState, actualWorkItemStatus);
     }

@@ -4,6 +4,8 @@ import java.util.Set;
 
 public class TranssService
 {
+
+    public static final String TRANSS_UPDATE_COMMENT = "Updated by TRANSS - Build Trust Throughout Transparency!";
     private ImageRecognition imageRecognition;
     private ALMProvider almProvider;
 

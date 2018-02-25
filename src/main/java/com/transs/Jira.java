@@ -14,10 +14,15 @@ import java.util.Set;
 
 public class Jira implements ALMProvider
 {
+
     //since transs not yet impersonates a specific client, this class works with fixed credentials.
     //to make this class funciotnal replace it with actual credentials
     private static String auth = new String(Base64.encode("<username>:<password>"));
     private final Client client = Client.create();
+
+    //The url prefix is currently hard coded to transs specific jira project - the url will change with a different
+    //login to the different projects
+    private static final String URL_PREFIX = "https://transs.atlassian.net/rest/api/2/";
 
     @Override
     public void updateWorkItems(Set<WorkItemDetails> workItemDetails)
@@ -31,7 +36,7 @@ public class Jira implements ALMProvider
     @Override
     public String getWorkItemStatus(String id)
     {
-        String url = "https://transs.atlassian.net/rest/api/2/issue/TRANSPARK-" + id;
+        String url = URL_PREFIX +"issue/TRANSPARK-" + id;
         WebResource webResource = client.resource(url);
         ClientResponse response = webResource.header("Authorization", "Basic " + auth).type("application/json")
                 .accept("application/json").get(ClientResponse.class);
@@ -44,17 +49,17 @@ public class Jira implements ALMProvider
     }
 
 
-    public void updateWorkItem(int Id, String statusName)
+    private void updateWorkItem(int id, String statusName)
     {
         try
         {
-            String transitionId = getTransitionId(Id, statusName);
+            String transitionId = getTransitionId(id, statusName);
             if(transitionId == null){
-                System.out.println("No need for an update on work item: " + Id);
+                System.out.println("No need for an update on work item: " + id);
                 return;
             }
-            updateState(Id, transitionId);
-            addComment(Id);
+            updateState(id, transitionId);
+            addComment(id);
             System.out.println("Finished");
         }
         catch (Exception e)
@@ -63,9 +68,9 @@ public class Jira implements ALMProvider
         }
     }
 
-    //Taldo - return here and activate the search ability
+    //Taldo - search is currently not active and not used
     private void search(String term){
-        String url = "https://transs.atlassian.net/rest/api/2/search";
+        String url = URL_PREFIX + "search";
         System.out.println(url);
 
         String query = "Summary ~ \"" + term + "\"";
@@ -99,10 +104,10 @@ public class Jira implements ALMProvider
     }
 
 
-    private String getTransitionId(int Id, String statusName)
+    private String getTransitionId(int id, String statusName)
     {
         String transitionId = null;
-        String url = "https://transs.atlassian.net/rest/api/2/issue/TRANSPARK-" + Id + "/transitions";
+        String url = createTransitionsUrl(id);
         System.out.println(url);
         WebResource webResource = client.resource(url);
         ClientResponse response = webResource.header("Authorization", "Basic " + auth).type("application/json")
@@ -121,9 +126,9 @@ public class Jira implements ALMProvider
         return transitionId;
     }
 
-    private void updateState(int Id, String transitionId)
+    private void updateState(int id, String transitionId)
     {
-        String url = "https://transs.atlassian.net/rest/api/2/issue/TRANSPARK-" + Id + "/transitions";
+        String url = createTransitionsUrl(id);
         System.out.println(url);
 
         JSONObject transitionJson = new JSONObject();
@@ -143,12 +148,17 @@ public class Jira implements ALMProvider
     private void addComment(int Id)
     {
         JSONObject data = new JSONObject();
-        data.accumulate("body", "Updated by TRANSS - Build Trust Throughout Transparency!");
-        String url = "https://transs.atlassian.net/rest/api/2/issue/TRANSPARK-" + Id + "/comment";
+        data.accumulate("body", TranssService.TRANSS_UPDATE_COMMENT);
+        String url = URL_PREFIX + "issue/TRANSPARK-" + Id + "/comment";
         WebResource webResource = client.resource(url);
         ClientResponse response = webResource.header("Authorization", "Basic " + auth)
                 .type("application/json")
                 .post(ClientResponse.class, data.toString());
         System.out.println("Status = " + response.getStatus());
     }
+
+    private String createTransitionsUrl(int id){
+        return URL_PREFIX + "issue/TRANSPARK-" + id + "/transitions";
+    }
+
 }
