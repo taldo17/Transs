@@ -12,15 +12,19 @@ import java.util.Set;
 public class Trello implements ALMProvider {
 
     private final Client client = Client.create();
-
     private HashMap<String, String> statusIdToNameMapping;
     private HashMap<String, String> statusNameToUdMapping;
+
     private static final String INITIAL_URL_PREFIX = "https://api.trello.com/1/";
+    //Taldo: Complete the keys when running
+    public static final String SECRET = "";
+    public static final String KEY = "";
+    private static final String TRELLO_TOKEN = "";
 
     public Trello(){
         JSONArray lists = getLists();
-        statusIdToNameMapping = new HashMap<String, String>(4);
-        statusNameToUdMapping = new HashMap<String, String>(4);
+        statusIdToNameMapping = new HashMap<>(4);
+        statusNameToUdMapping = new HashMap<>(4);
         statusIdToNameMapping.put("none", "Not found");
 
         for (int i = 0; i < lists.length(); i++) {
@@ -125,9 +129,7 @@ public class Trello implements ALMProvider {
     }
 
     private static String trelloAuthenticationPostfix(){
-        String trelloApiKey = ""; //originated by trello
-        String trelloToken = ""; //originated by trello
-        return "key=" + trelloApiKey +"&token=" + trelloToken;
+        return "key=" + KEY +"&token=" + TRELLO_TOKEN;
     }
 
 
