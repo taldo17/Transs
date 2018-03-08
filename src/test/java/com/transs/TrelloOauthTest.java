@@ -17,4 +17,11 @@ public class TrelloOauthTest
         TrelloOAuth trelloOauth = new TrelloOAuth();
         trelloOauth.initiate();
     }
+
+    @Test
+    public void useTheOauthGetAccessToken() throws URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, IOException
+    {
+        TrelloOAuth trelloOauth = new TrelloOAuth();
+        trelloOauth.getAccessCredentials("123", "28aa6b90ceb22ca9d0ff9d8f1e8bef90");
+    }
 }

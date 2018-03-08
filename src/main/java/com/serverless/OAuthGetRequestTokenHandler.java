@@ -3,7 +3,7 @@ package com.serverless;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.transs.AuthenticationService;
-import com.transs.OAuthInitial;
+import com.transs.OAuthCredentials;
 import com.transs.Trello;
 import com.transs.TrelloOAuth;
 import org.apache.log4j.Logger;
@@ -18,9 +18,9 @@ import java.security.NoSuchProviderException;
 import java.util.Collections;
 import java.util.Map;
 
-public class OauthGetRequestTokenHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse>
+public class OAuthGetRequestTokenHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse>
 {
-    private static final Logger LOG = Logger.getLogger(OauthGetRequestTokenHandler.class);
+    private static final Logger LOG = Logger.getLogger(OAuthGetRequestTokenHandler.class);
     private AuthenticationService authenticationService = new TrelloOAuth();
 
     @Override
@@ -28,10 +28,10 @@ public class OauthGetRequestTokenHandler implements RequestHandler<Map<String, O
     {
         try
         {
-            OAuthInitial oAuthInitial = authenticationService.initiate();
+            OAuthCredentials oAuthCredentials = authenticationService.initiate();
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
-                    .setObjectBody(oAuthInitial)
+                    .setObjectBody(oAuthCredentials)
                     .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & serverless"))
                     .build();
             //Taldo: what about the redirect

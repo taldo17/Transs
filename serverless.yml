@@ -61,11 +61,18 @@ functions:
           cors: true
 
   hello2:
-    handler: com.serverless.OauthGetRequestTokenHandler
+    handler: com.serverless.OAuthGetRequestTokenHandler
     events:
       - http:
           path: board/trello/getRequestToken
           method: get
+          cors: true
+  hello3:
+    handler: com.serverless.OAuthGetAccessTokenHandler
+    events:
+      - http:
+          path: board/trello/getAccessToken
+          method: post
           cors: true
 
 #    The following are a few example events you can configure

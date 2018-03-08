@@ -33,30 +33,52 @@ public class TrelloOAuth implements AuthenticationService
     private static Base64 base64 = new Base64();
     public static final String GET_REQUEST_TOKEN_URI = "https://trello.com/1/OAuthGetRequestToken";
     public static final String AUTHORIZE_TOKEN_URI = "https://trello.com/1/OAuthAuthorizeToken?oauth_token=";
+    public static final String GET_ACCESS_TOKEN_URI = "https://trello.com/1/OAuthGetAccessToken";
 
-
-    public OAuthInitial initiate() throws
+    @Override
+    public OAuthCredentials initiate() throws
             IOException, URISyntaxException, InvalidKeyException,
             NoSuchAlgorithmException {
 
         HttpClient httpclient = new DefaultHttpClient();
-        List<NameValuePair> qparams = createParameterList();
-        String signature = generateSignature(URLEncoder.encode(
-                GET_REQUEST_TOKEN_URI, ENC),
-                URLEncoder.encode(URLEncodedUtils.format(qparams, ENC), ENC));
-
-        qparams.add(new BasicNameValuePair("oauth_signature", signature));
-        URI uri = createGetTokenUri(qparams);
+        List<NameValuePair> qparams = createInitiateParameterList();
+        addSignatureToParams(qparams, GET_REQUEST_TOKEN_URI);
+        URI uri = createUri(qparams, "https", "www.trello.com", "/1/OAuthGetRequestToken");
         System.out.println("Get Token and Token Secret from:"
                 + uri.toString());
         HttpResponse httpResponse = executeHttpGet(httpclient, uri);
-        OAuthInitial oAuthInitial = extractOAuthInitial(httpResponse);
-        System.out.println("oauth_token=" + oAuthInitial.oAuthToken);
-        System.out.println("oauth_secret=" + oAuthInitial.oAuthSecret);
-        return oAuthInitial;
+        OAuthCredentials oAuthCredentials = extractOAuthInitial(httpResponse);
+        System.out.println("oauth_token=" + oAuthCredentials.oAuthToken);
+        System.out.println("oauth_secret=" + oAuthCredentials.oAuthSecret);
+        return oAuthCredentials;
     }
 
-    private OAuthInitial extractOAuthInitial(HttpResponse httpResponse) throws IOException
+    @Override
+    public OAuthCredentials getAccessCredentials(String verifier, String token) throws IOException, InvalidKeyException, NoSuchAlgorithmException, URISyntaxException
+    {
+        HttpClient httpclient = new DefaultHttpClient();
+        List<NameValuePair> qparams = createFinalTokenParameterList(verifier, token);
+        addSignatureToParams(qparams, GET_ACCESS_TOKEN_URI);
+        URI uri = createUri(qparams, "https", "www.trello.com", "/1/OAuthGetAccessToken");
+        System.out.println("Getting acces token from:"
+                + uri.toString());
+        HttpResponse httpResponse = executeHttpGet(httpclient, uri);
+        OAuthCredentials oAuthCredentials = extractOAuthInitial(httpResponse);
+        System.out.println("oauth_token=" + oAuthCredentials.oAuthToken);
+        System.out.println("oauth_secret=" + oAuthCredentials.oAuthSecret);
+        return oAuthCredentials;
+    }
+
+    private void addSignatureToParams(List<NameValuePair> qparams, String getRequestTokenUri) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
+    {
+        String signature = generateSignature(URLEncoder.encode(
+                getRequestTokenUri, ENC),
+                URLEncoder.encode(URLEncodedUtils.format(qparams, ENC), ENC));
+
+        qparams.add(new BasicNameValuePair("oauth_signature", signature));
+    }
+
+    private OAuthCredentials extractOAuthInitial(HttpResponse httpResponse) throws IOException
     {
         HttpEntity entity = httpResponse.getEntity();
         StringBuilder stringBuilder = new StringBuilder();
@@ -72,12 +94,13 @@ public class TrelloOAuth implements AuthenticationService
         return createOAuthInitial(reportString);
     }
 
-    private OAuthInitial createOAuthInitial(String reportString)
+    private OAuthCredentials createOAuthInitial(String responseString)
     {
-        String[] splitByEquals = reportString.split("=");
+        //Example response: oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&oauth_callback_confirmed=true
+        String[] splitByEquals = responseString.split("=");
         String oAuthToken = splitByEquals[1].split("&")[0];
         String oAuthSecret = splitByEquals[2].split("&")[0];
-        return new OAuthInitial(oAuthToken, oAuthSecret, TrelloOAuth.AUTHORIZE_TOKEN_URI);
+        return new OAuthCredentials(oAuthToken, oAuthSecret, TrelloOAuth.AUTHORIZE_TOKEN_URI);
     }
 
     private static String generateSignature(String url, String params)
@@ -118,27 +141,41 @@ public class TrelloOAuth implements AuthenticationService
         return response;
     }
 
-    private URI createGetTokenUri(List<NameValuePair> qparams) throws URISyntaxException
+
+    private URI createUri(List<NameValuePair> qparams, String schema, String host, String path) throws URISyntaxException
     {
-        return URIUtils.createURI("https", "www.trello.com", -1,
-                    "/1/OAuthGetRequestToken",
-                    URLEncodedUtils.format(qparams, ENC), null);
+        return URIUtils.createURI(schema, host, -1,
+                path,
+                URLEncodedUtils.format(qparams, ENC), null);
     }
 
-    private List<NameValuePair> createParameterList()
+    private List<NameValuePair> createInitiateParameterList()
     {
         List<NameValuePair> qparams = new ArrayList<>();
-        //Taldo: Complete Callback here:
-        qparams.add(new BasicNameValuePair("oauth_callback", "oob"));
-        qparams.add(new BasicNameValuePair("oauth_consumer_key", Trello.KEY));
-        qparams.add(new BasicNameValuePair("oauth_nonce", ""
-                + (int) (Math.random() * 100000000)));
-        qparams.add(new BasicNameValuePair("oauth_signature_method",
-                "HMAC-SHA1"));
-        qparams.add(new BasicNameValuePair("oauth_timestamp", ""
-                + (System.currentTimeMillis() / 1000)));
-        qparams.add(new BasicNameValuePair("oauth_version", "1.0"));
+        qparams.add(new BasicNameValuePair("oauth_callback", "https://www.transs.com/oauthCallBack"));
+        addMutualParametersForAllRequests(qparams);
         return qparams;
+    }
+
+    private List<NameValuePair> createFinalTokenParameterList(String verifier, String token)
+    {
+        List<NameValuePair> qparams = new ArrayList<>();
+        qparams.add(new BasicNameValuePair("oauth_token", token));
+        qparams.add(new BasicNameValuePair("oauth_verifier", verifier));
+        addMutualParametersForAllRequests(qparams);
+        return qparams;
+    }
+
+    private void addMutualParametersForAllRequests(List<NameValuePair> qparams)
+    {
+        qparams.add(new BasicNameValuePair("oauth_consumer_key", Trello.KEY)); // Mutual
+        qparams.add(new BasicNameValuePair("oauth_nonce", ""
+                + (int) (Math.random() * 100000000))); // Mutual
+        qparams.add(new BasicNameValuePair("oauth_signature_method",
+                "HMAC-SHA1"));// Mutual
+        qparams.add(new BasicNameValuePair("oauth_timestamp", ""
+                + (System.currentTimeMillis() / 1000)));//Mutual
+        qparams.add(new BasicNameValuePair("oauth_version", "1.0"));//Mutual
     }
 
 }
