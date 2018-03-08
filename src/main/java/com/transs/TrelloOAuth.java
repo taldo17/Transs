@@ -152,7 +152,7 @@ public class TrelloOAuth implements AuthenticationService
     private List<NameValuePair> createInitiateParameterList()
     {
         List<NameValuePair> qparams = new ArrayList<>();
-        qparams.add(new BasicNameValuePair("oauth_callback", "https://www.transs.com/oauthCallBack"));
+        qparams.add(new BasicNameValuePair("oauth_callback", "transs://oauthCallBack"));
         addMutualParametersForAllRequests(qparams);
         return qparams;
     }
