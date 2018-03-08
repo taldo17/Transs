@@ -11,5 +11,7 @@ import java.security.NoSuchProviderException;
 
 public interface AuthenticationService
 {
-    OAuthInitial initiate() throws NoSuchAlgorithmException, NoSuchProviderException, UnsupportedEncodingException, ClientProtocolException, IOException, URISyntaxException, InvalidKeyException;
+    OAuthCredentials initiate() throws NoSuchAlgorithmException, NoSuchProviderException, UnsupportedEncodingException, ClientProtocolException, IOException, URISyntaxException, InvalidKeyException;
+
+    OAuthCredentials getAccessCredentials(String verifier, String token) throws IOException, InvalidKeyException, NoSuchAlgorithmException, URISyntaxException;
 }
