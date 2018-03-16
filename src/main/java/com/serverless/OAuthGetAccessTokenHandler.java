@@ -3,17 +3,15 @@ package com.serverless;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.transs.AuthenticationService;
-import com.transs.OAuthCredentials;
+import com.transs.TokenAndBoards;
 import com.transs.TrelloOAuth;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class OAuthGetAccessTokenHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse>
 {
@@ -39,12 +37,14 @@ public class OAuthGetAccessTokenHandler implements RequestHandler<Map<String, Ob
         LOG.info("The verifier is " + verifier);
         Object token = jsonObject.get("token");
         LOG.info("The token is " + token);
+        Object secret = jsonObject.get("secret");
+        LOG.info("The secret is " + secret);
         try
         {
-            OAuthCredentials oAuthCredentials = authenticationService.getAccessCredentials(verifier.toString(), token.toString());
+            TokenAndBoards tokenAndBoards = authenticationService.getAccessCredentials(verifier.toString(), token.toString(), secret.toString());
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
-                    .setObjectBody(oAuthCredentials)
+                    .setObjectBody(tokenAndBoards)
                     .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & serverless"))
                     .build();
         }
@@ -52,16 +52,10 @@ public class OAuthGetAccessTokenHandler implements RequestHandler<Map<String, Ob
         {
             e.printStackTrace();
         }
-        catch (InvalidKeyException e)
-        {
+        catch (InterruptedException e) {
             e.printStackTrace();
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            e.printStackTrace();
-        }
-        catch (URISyntaxException e)
-        {
+        catch (ExecutionException e) {
             e.printStackTrace();
         }
 

@@ -4,19 +4,14 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.transs.AuthenticationService;
 import com.transs.OAuthCredentials;
-import com.transs.Trello;
 import com.transs.TrelloOAuth;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class OAuthGetRequestTokenHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse>
 {
@@ -28,7 +23,7 @@ public class OAuthGetRequestTokenHandler implements RequestHandler<Map<String, O
     {
         try
         {
-            OAuthCredentials oAuthCredentials = authenticationService.initiate();
+            OAuthCredentials oAuthCredentials = authenticationService.getTemporaryCredentials();
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
                     .setObjectBody(oAuthCredentials)
@@ -37,14 +32,7 @@ public class OAuthGetRequestTokenHandler implements RequestHandler<Map<String, O
             //Taldo: what about the redirect
 //            return Response.temporaryRedirect(getRedirectURI()).status(200).build();
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            e.printStackTrace();
-        }
-        catch (NoSuchProviderException e)
-        {
-            e.printStackTrace();
-        }
+
         catch (UnsupportedEncodingException e)
         {
             e.printStackTrace();
@@ -53,28 +41,14 @@ public class OAuthGetRequestTokenHandler implements RequestHandler<Map<String, O
         {
             e.printStackTrace();
         }
-        catch (URISyntaxException e)
-        {
+        catch (InterruptedException e) {
             e.printStackTrace();
         }
-        catch (InvalidKeyException e)
-        {
+        catch (ExecutionException e) {
             e.printStackTrace();
         }
         return null;
 
-    }
-
-    private static URI getRedirectURI() {
-        URI uri = null;
-        try {
-            //Taldo: change that to the token/ secret or what ever is needed
-            uri = new URI(TrelloOAuth.AUTHORIZE_TOKEN_URI + Trello.KEY);
-        }
-        catch (URISyntaxException urise){
-            LOG.error("exception occured on URI creation!!!"  + urise);
-        }
-        return uri;
     }
 
 }
