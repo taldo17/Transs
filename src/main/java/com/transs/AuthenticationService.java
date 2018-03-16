@@ -1,17 +1,11 @@
 package com.transs;
 
-import org.apache.http.client.ClientProtocolException;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.util.concurrent.ExecutionException;
 
 public interface AuthenticationService
 {
-    OAuthCredentials initiate() throws NoSuchAlgorithmException, NoSuchProviderException, UnsupportedEncodingException, ClientProtocolException, IOException, URISyntaxException, InvalidKeyException;
+    OAuthCredentials getTemporaryCredentials() throws IOException, ExecutionException, InterruptedException;
 
-    OAuthCredentials getAccessCredentials(String verifier, String token) throws IOException, InvalidKeyException, NoSuchAlgorithmException, URISyntaxException;
+    TokenAndBoards getAccessCredentials(String verifier, String token, String secret) throws IOException, ExecutionException, InterruptedException;
 }
