@@ -130,7 +130,7 @@ public class Trello implements ALMProvider {
     private JSONObject getCard(String id){
         
         String url = "https://api.trello.com/1/search?query="
-        + id.replace(" ", "%20").replace("\n", "%0A"); //remove spaces and newlines
+        + id.replace(" ", "%20").replace("\n", "%0A") //remove spaces and newlines
         + "&idBoards="+ userBoardId
         + "&modelTypes=cards&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organizations_limit=10&members_limit=10&"
         + trelloAuthenticationPostfix();
