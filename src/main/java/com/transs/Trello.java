@@ -127,17 +127,29 @@ public class Trello implements ALMProvider {
     }
 
 
-
     private JSONObject getCard(String id){
-        JSONArray cards = getCards();
-        for (int i = 0; i < cards.length(); i++) {
-            JSONObject card = cards.getJSONObject(i);
-            String cardName = card.getString("name");
-            if( cardName.equals(id)){
-                return card;
-            }
+        
+        String url = "https://api.trello.com/1/search?query="
+        + id.replace(" ", "%20").replace("\n", "%0A"); //remove spaces and newlines
+        + "&idBoards="+ userBoardId
+        + "&modelTypes=cards&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organizations_limit=10&members_limit=10&"
+        + trelloAuthenticationPostfix();
+
+
+        JSONObject result = getJsonObjectFromURL(client, url);
+        String cardsString = result.get("cards").toString();
+        JSONArray array = new JSONArray(cardsString);
+        if(array.length()>0)
+        {
+            return array.getJSONObject(0);
         }
-        return emptyCard();
+        return emptyCard();        
+    }
+
+    private static JSONObject getJsonObjectFromURL(Client client, String url) {
+        WebResource webResource = client.resource(url);
+        ClientResponse response = webResource.get(ClientResponse.class);
+        return new JSONObject(response.getEntity(String.class));
     }
 
     private static JSONObject emptyCard()
@@ -148,6 +160,4 @@ public class Trello implements ALMProvider {
     private  String trelloAuthenticationPostfix(){
         return "key=" + KEY +"&token=" + userAccessToken;
     }
-
-
 }
