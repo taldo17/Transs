@@ -6,8 +6,8 @@ Feature: Changing user stories status in the Jira
     Then the story should be in state <FinalState>
 
     Examples:
-      | Id | InitialState | NewState    | FinalState  |
-      | 24 | To Do        | In Progress | In Progress |
-      | 25 | In Progress  | Done        | Done        |
-      | 24 | In Progress  | In Progress | In Progress |
-      | 25 | To Do        | Done        | Done        |
+      | Id | InitialState | NewState   | FinalState |
+      | 24 | ToDo         | InProgress | InProgress |
+      | 25 | InProgress   | Done       | Done       |
+      | 24 | InProgress   | InProgress | InProgress |
+      | 25 | ToDo         | Done       | Done       |

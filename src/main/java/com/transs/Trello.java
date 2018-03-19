@@ -72,7 +72,10 @@ public class Trello implements ALMProvider {
     private void updateWorkItem(WorkItemDetails workItemDetail)
     {
         JSONObject card = getCard(workItemDetail.id);
-        String url = INITIAL_URL_PREFIX + "cards/"+ card.getString("id") +"?desc="+ getDescription(card) +"&idList=" + statusNameToIdMapping.get(workItemDetail.newState) + "&" + trelloAuthenticationPostfix();
+        String id = card.getString("id");
+        String newStateNoSpaces = workItemDetail.newState.replace(" ", "");
+        String idList = statusNameToIdMapping.get(newStateNoSpaces);
+        String url = INITIAL_URL_PREFIX + "cards/"+ id +"?desc="+ getDescription(card) +"&idList=" + idList + "&" + trelloAuthenticationPostfix();
         System.out.println(url);
         WebResource webResource = client.resource(url);
         ClientResponse response = webResource.put(ClientResponse.class);
@@ -130,7 +133,7 @@ public class Trello implements ALMProvider {
     private JSONObject getCard(String id){
         
         String url = "https://api.trello.com/1/search?query="
-        + id.replace(" ", "%20").replace("\n", "%0A"); //remove spaces and newlines
+        + id.replace(" ", "%20").replace("\n", "%0A")//; //remove spaces and newlines
         + "&idBoards="+ userBoardId
         + "&modelTypes=cards&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organizations_limit=10&members_limit=10&"
         + trelloAuthenticationPostfix();

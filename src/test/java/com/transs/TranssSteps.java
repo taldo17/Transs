@@ -25,8 +25,8 @@ public class TranssSteps
 
     public TranssSteps()
     {
-        newStatesToImages.put("To Do", "ToDo.jpeg");
-        newStatesToImages.put("In Progress", "24-InProgress.jpeg");
+        newStatesToImages.put("ToDo", "ToDo.jpeg");
+        newStatesToImages.put("InProgress", "24-InProgress.jpeg");
         newStatesToImages.put("Done", "25-Done.jpeg");
     }
 
