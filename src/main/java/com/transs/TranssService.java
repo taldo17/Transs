@@ -15,10 +15,10 @@ public class TranssService
         this.almProvider = almProvider;
     }
 
-    public void analyzeImageAndUpdateALM(byte[] rawData)
+    public void analyzeImageAndUpdateALM(byte[] rawData, String boardId, String token)
     {
         Set<WorkItemDetails> workItemDetails = imageRecognition.analyzeImage(rawData);
-        almProvider.updateWorkItems(workItemDetails);
+        almProvider.updateWorkItems(workItemDetails, boardId, token);
     }
 
 }

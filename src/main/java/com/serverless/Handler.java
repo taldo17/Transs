@@ -37,6 +37,10 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 		JSONObject jsonObject = new JSONObject(bodyObject.toString());
 		Object image = jsonObject.get("image");
 		LOG.info("The image is " + image);
+        Object token = jsonObject.get("token");
+        LOG.info("The token is " + token);
+        Object boardId = jsonObject.get("boardId");
+        LOG.info("The board id is " + boardId);
 		byte[] imageByte = null;
 		try
 		{
@@ -48,7 +52,7 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 		{
 			LOG.error("Taldo: got exception while decoding:  ", e);
 		}
-        transsService.analyzeImageAndUpdateALM(imageByte);
+        transsService.analyzeImageAndUpdateALM(imageByte, boardId.toString(), token.toString());
 		Response responseBody = new Response("Go Serverless v1.x! Your function executed successfully! Changed", input);
 		return ApiGatewayResponse.builder()
 				.setStatusCode(200)

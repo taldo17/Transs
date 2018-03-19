@@ -21,6 +21,7 @@ public class TranssSteps
     private Jira jira = new Jira();
     private Trello trello = new Trello();
     private int currentId;
+    private final String testBoardId = "5a927e792baffb4f2f90920f";
 
     public TranssSteps()
     {
@@ -36,8 +37,8 @@ public class TranssSteps
         currentId = id;
         Set<WorkItemDetails> workItemDetails = new HashSet<>();
         workItemDetails.add(new WorkItemDetails(0, 0, String.valueOf(id), initialState));
-        trello.updateWorkItems(workItemDetails);
-        String actualWorkItemStatus = trello.getWorkItemStatus(String.valueOf(id));
+        trello.updateWorkItems(workItemDetails, testBoardId, TrelloOAuth.TRELLO_TOKEN);
+        String actualWorkItemStatus = trello.getWorkItemStatus(String.valueOf(id), testBoardId, TrelloOAuth.TRELLO_TOKEN);
         Assert.assertEquals(initialState, actualWorkItemStatus);
     }
 
@@ -52,7 +53,7 @@ public class TranssSteps
         String interesting = imageOriginalBytes.toString();
         System.out.println(interesting);
         TranssService transsService = new TranssService(new RekognitionImageRecognition(), new Trello());
-        transsService.analyzeImageAndUpdateALM(imageOriginalBytes);
+        transsService.analyzeImageAndUpdateALM(imageOriginalBytes, testBoardId, TrelloOAuth.TRELLO_TOKEN);
     }
 
 
@@ -60,6 +61,6 @@ public class TranssSteps
     @Then("^the story should be in state (.*)$")
     public void the_story_should_be_in_state_Final_State(String finalState) throws Throwable
     {
-        Assert.assertEquals(finalState, trello.getWorkItemStatus(String.valueOf(currentId)));
+        Assert.assertEquals(finalState, trello.getWorkItemStatus(String.valueOf(currentId), testBoardId, TrelloOAuth.TRELLO_TOKEN));
     }
 }

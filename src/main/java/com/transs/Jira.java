@@ -25,7 +25,7 @@ public class Jira implements ALMProvider
     private static final String URL_PREFIX = "https://transs.atlassian.net/rest/api/2/";
 
     @Override
-    public void updateWorkItems(Set<WorkItemDetails> workItemDetails)
+    public void updateWorkItems(Set<WorkItemDetails> workItemDetails, String boardId, String token)
     {
         for (WorkItemDetails workItemDetail : workItemDetails)
         {
@@ -34,7 +34,7 @@ public class Jira implements ALMProvider
     }
 
     @Override
-    public String getWorkItemStatus(String id)
+    public String getWorkItemStatus(String id, String boardId, String token)
     {
         String url = URL_PREFIX +"issue/TRANSPARK-" + id;
         WebResource webResource = client.resource(url);
