@@ -14,9 +14,12 @@ import java.util.concurrent.ExecutionException;
 
 public class TrelloOAuth implements AuthenticationService {
 
+    public static final String SECRET = "";
+    public static final String TRELLO_TOKEN = "";
+
     final OAuth10aService service = new ServiceBuilder(Trello.KEY)
             .apiKey(Trello.KEY)
-            .apiSecret(Trello.SECRET)
+            .apiSecret(SECRET)
             .callback("transs://www.transs.com/#/oauthcallback/")
             .build(TrelloApi.instance());
 

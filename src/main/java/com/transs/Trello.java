@@ -13,33 +13,45 @@ public class Trello implements ALMProvider {
 
     private final Client client = Client.create();
     private HashMap<String, String> statusIdToNameMapping;
-    private HashMap<String, String> statusNameToUdMapping;
+    private HashMap<String, String> statusNameToIdMapping;
 
     private static final String INITIAL_URL_PREFIX = "https://api.trello.com/1/";
-    //Taldo: Complete the keys when running
-    public static final String SECRET = "";
     public static final String KEY = "";
-    private static final String TRELLO_TOKEN = "";
+    private String userAccessToken;
+    private String userBoardId;
 
     public Trello(){
+    }
+
+    private void createInitialExpectedLists() {
         JSONArray lists = getLists();
+        if(statusIdToNameMapping!= null && statusNameToIdMapping != null){
+            return;
+        }
         statusIdToNameMapping = new HashMap<>(4);
-        statusNameToUdMapping = new HashMap<>(4);
+        statusNameToIdMapping = new HashMap<>(4);
         statusIdToNameMapping.put("none", "Not found");
 
         for (int i = 0; i < lists.length(); i++) {
-            JSONObject list = lists.getJSONObject(i);
-            String id = list.getString("id");
-            String name = list.getString("name");
-            System.out.println("adding id = " + id + ", name = " + name);
-            statusIdToNameMapping.put(id, name);
-            statusNameToUdMapping.put(name, id);
+            fillTheMapping(lists, i);
         }
     }
 
+    private void fillTheMapping(JSONArray lists, int i) {
+        JSONObject list = lists.getJSONObject(i);
+        String id = list.getString("id");
+        String name = list.getString("name");
+        System.out.println("adding id = " + id + ", name = " + name);
+        statusIdToNameMapping.put(id, name);
+        statusNameToIdMapping.put(name, id);
+    }
+
     @Override
-    public void updateWorkItems(Set<WorkItemDetails> workItemDetails)
+    public void updateWorkItems(Set<WorkItemDetails> workItemDetails, String boardId, String token)
     {
+        userAccessToken = token;
+        userBoardId = boardId;
+        createInitialExpectedLists();
         for (WorkItemDetails workItemDetail : workItemDetails)
         {
             updateWorkItem(workItemDetail);
@@ -47,15 +59,20 @@ public class Trello implements ALMProvider {
         }
     }
 
+
+
     @Override
-    public String getWorkItemStatus(String id) {
-        return statusIdToNameMapping.get(getCard(id, client).get("idList"));
+    public String getWorkItemStatus(String id, String boardId, String token) {
+        userAccessToken = token;
+        userBoardId = boardId;
+        createInitialExpectedLists();
+        return statusIdToNameMapping.get(getCard(id).get("idList"));
     }
 
     private void updateWorkItem(WorkItemDetails workItemDetail)
     {
-        JSONObject card = getCard(workItemDetail.id, client);
-        String url = INITIAL_URL_PREFIX + "cards/"+ card.getString("id") +"?desc="+ getDescription(card) +"&idList=" + statusNameToUdMapping.get(workItemDetail.newState) + "&" + trelloAuthenticationPostfix();
+        JSONObject card = getCard(workItemDetail.id);
+        String url = INITIAL_URL_PREFIX + "cards/"+ card.getString("id") +"?desc="+ getDescription(card) +"&idList=" + statusNameToIdMapping.get(workItemDetail.newState) + "&" + trelloAuthenticationPostfix();
         System.out.println(url);
         WebResource webResource = client.resource(url);
         ClientResponse response = webResource.put(ClientResponse.class);
@@ -89,12 +106,12 @@ public class Trello implements ALMProvider {
 
 
     private JSONArray getLists(){
-        String url = INITIAL_URL_PREFIX + "boards/5a927e792baffb4f2f90920f/lists?" + trelloAuthenticationPostfix();
+        String url = INITIAL_URL_PREFIX + "boards/" + userBoardId + "/lists?" + trelloAuthenticationPostfix();
         return httpGetOnUrl(url);
     }
 
     private JSONArray getCards(){
-        String url = INITIAL_URL_PREFIX + "boards/5a927e792baffb4f2f90920f/cards?" + trelloAuthenticationPostfix();
+        String url = INITIAL_URL_PREFIX + "boards/" + userBoardId + "/cards?" + trelloAuthenticationPostfix();
         return httpGetOnUrl(url);
     }
 
@@ -111,7 +128,7 @@ public class Trello implements ALMProvider {
 
 
 
-    private JSONObject getCard(String id, Client client){
+    private JSONObject getCard(String id){
         JSONArray cards = getCards();
         for (int i = 0; i < cards.length(); i++) {
             JSONObject card = cards.getJSONObject(i);
@@ -128,8 +145,8 @@ public class Trello implements ALMProvider {
         return new JSONObject("{\"idList\":\"none\"}");
     }
 
-    private static String trelloAuthenticationPostfix(){
-        return "key=" + KEY +"&token=" + TRELLO_TOKEN;
+    private  String trelloAuthenticationPostfix(){
+        return "key=" + KEY +"&token=" + userAccessToken;
     }
 
 
