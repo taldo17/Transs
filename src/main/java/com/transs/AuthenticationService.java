@@ -7,5 +7,5 @@ public interface AuthenticationService
 {
     OAuthCredentials getTemporaryCredentials() throws IOException, ExecutionException, InterruptedException;
 
-    TokenAndBoards getAccessCredentials(String verifier, String token, String secret) throws IOException, ExecutionException, InterruptedException;
+    FinalLoginDetails getAccessCredentials(String verifier, String token, String secret) throws IOException, ExecutionException, InterruptedException;
 }

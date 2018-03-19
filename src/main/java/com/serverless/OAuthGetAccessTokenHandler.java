@@ -3,7 +3,7 @@ package com.serverless;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.transs.AuthenticationService;
-import com.transs.TokenAndBoards;
+import com.transs.FinalLoginDetails;
 import com.transs.TrelloOAuth;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -41,10 +41,10 @@ public class OAuthGetAccessTokenHandler implements RequestHandler<Map<String, Ob
         LOG.info("The secret is " + secret);
         try
         {
-            TokenAndBoards tokenAndBoards = authenticationService.getAccessCredentials(verifier.toString(), token.toString(), secret.toString());
+            FinalLoginDetails finalLoginDetails = authenticationService.getAccessCredentials(verifier.toString(), token.toString(), secret.toString());
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
-                    .setObjectBody(tokenAndBoards)
+                    .setObjectBody(finalLoginDetails)
                     .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & serverless"))
                     .build();
         }
