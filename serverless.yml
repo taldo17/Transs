@@ -59,6 +59,7 @@ functions:
           path: board/upload
           method: post
           cors: true
+    timeout: 20
 
   hello2:
     handler: com.serverless.OAuthGetRequestTokenHandler

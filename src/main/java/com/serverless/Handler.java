@@ -24,11 +24,6 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 		BasicConfigurator.configure();
 		BASE64Decoder decoder = new BASE64Decoder();
 
-		for (String s : input.keySet())
-		{
-			LOG.info("Taldo: key and values are: " + s + " " + input.get(s));
-		}
-
 		Object bodyObject = input.get("body");
 		if(bodyObject == null){
 			LOG.error("The body is null!!!");
@@ -36,7 +31,7 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 		}
 		JSONObject jsonObject = new JSONObject(bodyObject.toString());
 		Object image = jsonObject.get("image");
-		LOG.info("The image is " + image);
+		LOG.info("Got the Image");
         Object token = jsonObject.get("token");
         LOG.info("The token is " + token);
         Object boardId = jsonObject.get("boardId");
